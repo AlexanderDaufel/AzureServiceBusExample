@@ -27,11 +27,6 @@ namespace AzureServiceBusExample.Adapters
             _client = new ServiceBusClient(connectionStrings.AzureStorageBus);
         }
 
-        public void ReceiverMessage()
-        {
-            throw new System.NotImplementedException();
-        }
-
         public async Task SendMessages(string eventContainersName, List<CloudEvent> events)
         {
             await using (var sender = _client.CreateSender(eventContainersName))

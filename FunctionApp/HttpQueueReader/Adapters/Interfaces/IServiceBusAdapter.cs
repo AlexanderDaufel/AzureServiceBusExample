@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace AzureServiceBusExample.Adapters.Interfaces
+namespace HttpQueueReader.Adapters.Interfaces
 {
     public interface IServiceBusAdapter
     {
-        Task SendMessages(string eventContainersName, List<CloudEvent> events);
+        Task<List<CloudEvent>> ReceiveMessages(string eventContainerName);
     }
 }

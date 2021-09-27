@@ -36,7 +36,7 @@ class DeviceDataGraph extends React.Component {
     state = {
         time: new Date(),
         events: new Ring(50),
-        percentile50Out: new Ring(25),
+        avgOver5Minutes: new Ring(25),
         stopRequest: false,
         requestMade: false
     };
@@ -56,9 +56,9 @@ class DeviceDataGraph extends React.Component {
                 value: { value: avg() }
             })
             .to(EventOut, event => {
-                const events = this.state.percentile50Out;
+                const events = this.state.avgOver5Minutes;
                 events.push(event);
-                this.setState({ percentile50Out: events });
+                this.setState({ avgOver5Minutes: events });
             });
 
         //
@@ -124,9 +124,9 @@ class DeviceDataGraph extends React.Component {
             events: this.state.events.toArray()
         });
 
-        const perc50Series = new TimeSeries({
+        const avgOver5Series = new TimeSeries({
             name: "Average Temperature over 5 Minutes",
-            events: this.state.percentile50Out.toArray()
+            events: this.state.avgOver5Minutes.toArray()
         });
 
         //debugger;
@@ -148,7 +148,7 @@ class DeviceDataGraph extends React.Component {
             <Charts>
                 <BarChart
                     axis="y"
-                    series={perc50Series}
+                    series={avgOver5Series}
                     style={fiveMinuteStyle}
                     columns={["value"]}
                 />

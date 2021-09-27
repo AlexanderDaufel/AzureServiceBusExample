@@ -24,23 +24,30 @@ namespace HttpQueueReader.Adapters
             _client = new ServiceBusClient(connectionStrings);
         }
 
-        public async Task<List<CloudEvent>> ReceiveMessages(string eventContainerName)
+        public async Task<List<CloudEvent>> ReceiveMessages(string eventContainerName, int pageSize)
         {
+            if (pageSize == 0)
+            {
+                pageSize = 10;
+            }
+
+            _logger.LogInformation($"Pulling events from '{eventContainerName}'");
+
             var receiver = _client.CreateReceiver(eventContainerName, new ServiceBusReceiverOptions());
 
+            var peekedMsg = await receiver.PeekMessageAsync();
             var events = new List<CloudEvent>();
             var formatter = new JsonEventFormatter<DeviceData>();
-            var message = await receiver.ReceiveMessageAsync();
-            for (int i = 0; i < 100 || message == null; i++)
+            for (int i = 0; i < pageSize && peekedMsg != null; i++)
             {
-                if (message != null)
-                {
-                    var cloudEvent = await formatter.DecodeStructuredModeMessageAsync(message.Body.ToStream(), null, null);
-                    events.Add(cloudEvent);
-                    await receiver.CompleteMessageAsync(message);
-                }
+                var message = await receiver.ReceiveMessageAsync();
+                
+                var cloudEvent = await formatter.DecodeStructuredModeMessageAsync(message.Body.ToStream(), null, null);
+                events.Add(cloudEvent);
 
-                message = await receiver.ReceiveMessageAsync();
+                await receiver.CompleteMessageAsync(message);
+
+                peekedMsg = await receiver.PeekMessageAsync();
             }
 
             _logger.LogInformation($"{events.Count} events found for '{eventContainerName}'");

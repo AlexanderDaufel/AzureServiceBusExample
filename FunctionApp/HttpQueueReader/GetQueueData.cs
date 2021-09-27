@@ -27,8 +27,14 @@ namespace HttpQueueReader
             log.LogInformation("C# HTTP trigger function processed a request.");
 
             string eventContainerName = req.Query["eventContainerName"];
+            string pageSizeQuery = req.Query["pageSize"];
 
-            var events = await _serviceBusAdapter.ReceiveMessages(eventContainerName);
+            if (!int.TryParse(pageSizeQuery, out var pageSize))
+            {
+                return new BadRequestObjectResult($"Failed to parse page size '{pageSizeQuery}' as an integer.");
+            }
+
+            var events = await _serviceBusAdapter.ReceiveMessages(eventContainerName, pageSize);
 
             log.LogInformation($"C# HTTP trigger function responding with payload of {events.Count} events.");
 

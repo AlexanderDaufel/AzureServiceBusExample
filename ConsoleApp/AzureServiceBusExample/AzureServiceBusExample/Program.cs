@@ -36,6 +36,7 @@ namespace AzureServiceBusExample
             var dataStreams = serviceProvider.GetService<IEnumerable<IDeviceDataStreamManager>>();
             foreach(var stream in dataStreams)
             {
+
                 var events = await stream.SendDataStream();
 
                 if (events?.Any(e => 

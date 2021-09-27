@@ -6,6 +6,6 @@ namespace HttpQueueReader.Adapters.Interfaces
 {
     public interface IServiceBusAdapter
     {
-        Task<List<CloudEvent>> ReceiveMessages(string eventContainerName);
+        Task<List<CloudEvent>> ReceiveMessages(string eventContainerName, int pageSize);
     }
 }

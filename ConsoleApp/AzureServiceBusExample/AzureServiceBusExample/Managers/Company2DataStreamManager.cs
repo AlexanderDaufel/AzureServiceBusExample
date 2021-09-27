@@ -36,10 +36,10 @@ namespace AzureServiceBusExample.Managers
         public async Task<List<CloudEvent>> SendDataStream()
         {
             var events = new List<CloudEvent>();
+            var startTime = DateTimeOffset.UtcNow.AddMinutes(2);
+            _logger.LogInformation($"[${startTime}] Sending messages for {COMPANY.ToUpper()}");
 
-            _logger.LogInformation($"Sending messages for {COMPANY.ToUpper()}");
-
-            for (int i = 1; i <= 60; i++)
+            for (int i = 1; i <= 500; i++)
             {
                 var randomizedDeviceData = _deviceDataHelper.GetDeviceData();
                 randomizedDeviceData.Company = COMPANY;
@@ -49,13 +49,19 @@ namespace AzureServiceBusExample.Managers
                     Id = Guid.NewGuid().ToString(),
                     Type = nameof(DeviceData),
                     Source = new Uri($"https://{randomizedDeviceData.Company.Replace(" ", "")}.com/"),
-                    Time = DateTimeOffset.UtcNow,
+                    Time = startTime.AddMinutes(i),
                     Subject = "Device Temperature Observed",
                     Data = randomizedDeviceData
                 });
             }
 
-            await _serviceBusAdapter.SendMessages(_eventContainersOptions.Topic, events);
+            await _serviceBusAdapter.SendMessages(
+                    _eventContainersOptions.Topic
+                    , events
+                        .GroupBy(e => e.Time)
+                        .Select(g => g.First())
+                        .OrderBy(e => e.Time)
+                        .ToList());
 
             var recievedMessages = events
                 .Where(e => (e.Data as DeviceData)?.LoggingLevel == LoggingLevelTypes.Plain)

@@ -34,7 +34,12 @@ namespace AzureServiceBusExample
             var distributorEvents = new List<CloudEvent>();
             var midmarkEvents = new List<CloudEvent>();
             var dataStreams = serviceProvider.GetService<IEnumerable<IDeviceDataStreamManager>>();
-            foreach(var stream in dataStreams)
+
+            /*var tasks = new List<Task>();
+            tasks.Add(Task.Run(() => DoWork()));
+            await Task.WhenAll(tasks);*/
+
+            foreach (var stream in dataStreams)
             {
 
                 var events = await stream.SendDataStream();

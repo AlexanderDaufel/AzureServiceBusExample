@@ -32,10 +32,15 @@ const minute = 60 * sec;
 const hours = 60 * minute;
 const rate = 200;
 
+const red = "#b4464b";
+const green = "#4bb446";
+const blue = "#464bb4";
+
 class DeviceDataGraph extends React.Component {
     state = {
         time: new Date(),
-        events: new Ring(50),
+        plainEvents: new Ring(50),
+        richEvents: new Ring(50),
         avgOver5Minutes: new Ring(25),
         stopRequest: false,
         requestMade: false
@@ -65,7 +70,7 @@ class DeviceDataGraph extends React.Component {
         // Setup our interval to advance the time and generate raw events
         //
         this.interval = setInterval(() => {
-            if (this.state.stopRequest || this.state.requestMade) {
+            if (!this.props.runStream || this.state.stopRequest || this.state.requestMade) {
                 return;
             }
 
@@ -79,9 +84,15 @@ class DeviceDataGraph extends React.Component {
                         const event = new TimeEvent(t, parseInt(newData[0].data.temperature));
 
                         // Raw events
-                        const newEvents = this.state.events;
-                        newEvents.push(event);
-                        this.setState({ time: t, events: newEvents });
+                        if (newData[0].data.loggingLevel === "plain") {
+                            const newEvents = this.state.plainEvents;
+                            newEvents.push(event);
+                            this.setState({ time: t, plainEvents: newEvents });
+                        } else if (newData[0].data.loggingLevel === "rich") {
+                            const newEvents = this.state.richEvents;
+                            newEvents.push(event);
+                            this.setState({ time: t, richEvents: newEvents });
+                        }
 
                         // Let our aggregators process the event
                         this.stream.addEvent(event);
@@ -101,27 +112,47 @@ class DeviceDataGraph extends React.Component {
     render() {
         const fiveMinuteStyle = {
             value: {
-                normal: { fill: "#a84c32", opacity: 0.2 },
-                highlight: { fill: "a84c32", opacity: 0.5 },
-                selected: { fill: "a84c32", opacity: 0.5 }
+                normal: { fill: red, opacity: 0.4 },
+                highlight: { fill: red, opacity: 0.5 },
+                selected: { fill: red, opacity: 0.5 }
             }
         };
 
-        const scatterStyle = {
+        const plainDataScatterStyle = {
             value: {
                 normal: {
-                    fill: "steelblue",
-                    opacity: 0.5
+                    fill: blue,
+                    opacity: 0.8
                 }
             }
         };
 
+        const richDataScatterStyle = {
+            value: {
+                normal: {
+                    fill: green,
+                    opacity: 0.8
+                }
+            }
+        };
+        
+        const style = styler([
+            { key: "avgOver5", color: red, width: 1, dashed: true },
+            { key: "plainData", color: blue, width: 1, dashed: true },
+            { key: "richData", color: green, width: 1, dashed: true }
+        ]);
+
         //
         // Create a TimeSeries for our raw, 5min and hourly events
         //
-        const eventSeries = new TimeSeries({
-            name: "raw",
-            events: this.state.events.toArray()
+        const plainDataEventSeries = new TimeSeries({
+            name: "plain",
+            events: this.state.plainEvents.toArray()
+        });
+
+        const richDataEventSeries = new TimeSeries({
+            name: "rich",
+            events: this.state.richEvents.toArray()
         });
 
         const avgOver5Series = new TimeSeries({
@@ -129,7 +160,6 @@ class DeviceDataGraph extends React.Component {
             events: this.state.avgOver5Minutes.toArray()
         });
 
-        //debugger;
         // Timerange for the chart axis
         const initialBeginTime = new Date();
         const timeWindow = 1 * hours;
@@ -152,26 +182,34 @@ class DeviceDataGraph extends React.Component {
                     style={fiveMinuteStyle}
                     columns={["value"]}
                 />
-                <ScatterChart axis="y" series={eventSeries} style={scatterStyle} radius="4.0" />
+                <ScatterChart axis="y" series={plainDataEventSeries} style={plainDataScatterStyle} radius="3.0" />
+                <ScatterChart axis="y" series={richDataEventSeries} style={richDataScatterStyle} radius="3.0" />
             </Charts>
         );
 
-        const style = styler([
-            { key: "perc50", color: "#a84c32", width: 1, dashed: true }
-        ]);
-
         return (
-            <Paper style={{margin: 40}}>
+            <Paper style={{margin: 20, width: 600}}>
                 <Grid style={{paddingBottom: 20}}>
                     <Grid style={{padding: 20}}>
+                        <h2>{this.props.name}</h2>
                         <Legend
                             type="swatch"
                             style={style}
                             categories={[
                                 {
-                                    key: "perc50",
+                                    key: "avgOver5",
                                     label: "Average Temperature over 5 Minutes",
-                                    style: { fill: "#a84c32" }
+                                    style: { fill: red }
+                                },
+                                {
+                                    key: "plainData",
+                                    label: "Plain Data",
+                                    style: { fill: green }
+                                },
+                                {
+                                    key: "richData",
+                                    label: "Rich Data",
+                                    style: { fill: blue }
                                 }
                             ]}
                         />
@@ -180,13 +218,13 @@ class DeviceDataGraph extends React.Component {
                 <Grid>
                     <Resizable>
                         <ChartContainer timeRange={timeRange}>
-                            <ChartRow height="700">
+                            <ChartRow height="175">
                                 <YAxis
                                     id="y"
                                     label="temperature"
                                     min={0}
                                     max={200}
-                                    width="70"
+                                    width="75"
                                     type="linear"
                                 />
                                 {charts}

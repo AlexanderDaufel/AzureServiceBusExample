@@ -3,6 +3,8 @@ import {
   Grid,
   Paper
 } from '@mui/material';
+import PausePresentationIcon from '@mui/icons-material/PausePresentation';
+import SlideshowOutlinedIcon from '@mui/icons-material/SlideshowOutlined';
 import {
     TimeSeries,
     TimeRange,
@@ -191,7 +193,20 @@ class DeviceDataGraph extends React.Component {
             <Paper style={{margin: 20, width: 600}}>
                 <Grid style={{paddingBottom: 20}}>
                     <Grid style={{padding: 20}}>
-                        <h2>{this.props.name}</h2>
+                        <Grid
+                            container
+                            direction="row"
+                            justifyContent="space-between"
+                            alignItems="center"
+                        >
+                            <h2>{this.props.name}</h2>
+                            {(this.state.stopRequest || !this.props.runStream) &&
+                                <PausePresentationIcon fontSize="large" style={{color: "red"}} />
+                            }
+                            {(!this.state.stopRequest && this.props.runStream) &&
+                                <SlideshowOutlinedIcon fontSize="large" style={{color: "green"}} />
+                            }
+                        </Grid>
                         <Legend
                             type="swatch"
                             style={style}

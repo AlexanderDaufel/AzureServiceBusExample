@@ -34,13 +34,23 @@ namespace AzureServiceBusExample
             var distributorEvents = new List<CloudEvent>();
             var midmarkEvents = new List<CloudEvent>();
             var dataStreams = serviceProvider.GetService<IEnumerable<IDeviceDataStreamManager>>();
-
-            var tasks = new List<Task>();
-            foreach (var stream in dataStreams)
+            foreach(var stream in dataStreams)
             {
-                tasks.Add(Task.Run(async () => await stream.SendDataStream()));
+                var events = await stream.SendDataStream();
+
+                if (events?.Any(e => 
+                        (e.Data as DeviceData)?.Company == "Company 1" ||
+                        (e.Data as DeviceData)?.Company == "Company 2")
+                    ?? false)
+                {
+                    distributorEvents.AddRange(events);
+                }
+
+                midmarkEvents.AddRange(events);
             }
-            await Task.WhenAll(tasks);
+
+            logger.LogInformation($"We should have only recieved {distributorEvents.Count} in the distributor 1 queue...\n\n");
+            logger.LogInformation($"We should have only recieved {midmarkEvents.Count} in the midmark queue...\n\n");
 
             logger.LogInformation("All done!");
         }

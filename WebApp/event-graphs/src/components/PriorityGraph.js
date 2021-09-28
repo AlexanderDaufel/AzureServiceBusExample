@@ -1,7 +1,10 @@
 import React from 'react';
 import {
-  Paper
+  Paper,
+  Grid
 } from '@mui/material';
+import PausePresentationIcon from '@mui/icons-material/PausePresentation';
+import SlideshowOutlinedIcon from '@mui/icons-material/SlideshowOutlined';
 import { Bar } from 'react-chartjs-2';
 
 import EventStream from '../services/EventStream';
@@ -27,7 +30,7 @@ class PriorityGraph extends React.Component {
 
             this.setState({ requestMade: true });
 
-            EventStream.GetQueueData(this.props.eventQueue, 50)
+            EventStream.GetQueueData(this.props.eventQueue, 75)
                 .then((response) => response.json())
                 .then((data) => {
                     if (data && data.length > 0) {
@@ -105,7 +108,7 @@ class PriorityGraph extends React.Component {
             responsive: true,
             plugins: {
                 legend: {
-                    position: 'right',
+                    display: false,
                 },
                 title: {
                     display: true,
@@ -116,9 +119,20 @@ class PriorityGraph extends React.Component {
 
         return (
             <Paper style={{margin: 20, padding: 20, width: 500}}>
-                <div className='header'>
-                    <h1 className='title'>{this.props.name}</h1>
-                </div>
+                <Grid
+                    container
+                    direction="row"
+                    justifyContent="space-between"
+                    alignItems="center"
+                >
+                    <h2>{this.props.name}</h2>
+                    {(this.state.stopRequest || !this.props.runStream) &&
+                        <PausePresentationIcon fontSize="large" style={{color: "red"}} />
+                    }
+                    {(!this.state.stopRequest && this.props.runStream) &&
+                        <SlideshowOutlinedIcon fontSize="large" style={{color: "green"}} />
+                    }
+                </Grid>
                 <Bar data={data} options={options} />
             </Paper>
         );

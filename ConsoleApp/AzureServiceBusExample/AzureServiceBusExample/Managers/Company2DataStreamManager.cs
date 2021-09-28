@@ -61,9 +61,7 @@ namespace AzureServiceBusExample.Managers
                         .OrderBy(e => e.Time)
                         .ToList());
 
-            var recievedMessages = events
-                .Where(e => (e.Data as DeviceData)?.LoggingLevel == LoggingLevelTypes.Plain)
-                .Count();
+            var recievedMessages = events.Count();
             _logger.LogInformation($"We should have only recieved {recievedMessages} in the {COMPANY} queue...\n\n");
 
             return events;

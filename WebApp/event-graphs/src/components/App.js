@@ -16,7 +16,7 @@ import DeviceDataGraph from './DeviceDataGraph';
 import PriorityGraph from './PriorityGraph';
 
 export default function App() {
-  const [view, setView] = React.useState(5);
+  const [view, setView] = React.useState(1);
   const [start, setStart] = React.useState(false);
 
   const style = {
@@ -49,7 +49,7 @@ export default function App() {
           <IconButton aria-label="stop">
             <StopCircleIcon fontSize="large" style={(!start ? {color: "red"} : {} )} onClick={(e) => setStart(false)} />
           </IconButton>
-          <FormControl>
+          <FormControl style={{marginLeft: 20}}>
             <InputLabel id="demo-simple-select-label">View</InputLabel>
             <Select
               labelId="demo-simple-select-label"
@@ -58,11 +58,12 @@ export default function App() {
               label="View"
               onChange={handleChange}
             >
-              <MenuItem value={1}>Company 1</MenuItem>
-              <MenuItem value={2}>Company 2</MenuItem>
-              <MenuItem value={3}>Company 3</MenuItem>
-              <MenuItem value={4}>Distributor</MenuItem>
-              <MenuItem value={5}>Midmark</MenuItem>
+              <MenuItem value={1}>All</MenuItem>
+              <MenuItem value={2}>Company 1</MenuItem>
+              <MenuItem value={3}>Company 2</MenuItem>
+              <MenuItem value={4}>Company 3</MenuItem>
+              <MenuItem value={5}>Distributor</MenuItem>
+              <MenuItem value={6}>Midmark</MenuItem>
             </Select>
           </FormControl>
         </Grid>
@@ -73,48 +74,51 @@ export default function App() {
           alignItems="center"
         >
           <Grid
-            style={(view === 4 ? {} : {display: "none"})}
-            item xs={12} container direction="row" justifyContent="center" alignItems="center"
+            style={(view === 1 || view === 6 ? {} : {display: "none"})}
+            item xs={(view === 1 ? 4 : 12)} container direction="row" justifyContent="center" alignItems="center"
           >
             <PriorityGraph
-              name={"Distributor 1 Collected Data"}
-              runStream={start}
-              eventQueue={"distrubutor.devicedata.sterilizers.inbound"}
-            />
-          </Grid>
-          <Grid
-            style={(view === 5 ? {} : {display: "none"})}
-            item xs={12} container direction="row" justifyContent="center" alignItems="center"
-          >
-            <PriorityGraph
-              name={"Midmark Collected Data"}
+              name={"Midmark Aggregated Data"}
               runStream={start}
               eventQueue={"midmark.predictive_maintenance.sterilizers.inbound"}
             />
           </Grid>
           <Grid
-            style={(view === 1 || view === 4 || view === 5 ? {} : {display: "none"})}
+            style={(view === 1 || view === 5 ? {} : {display: "none"})}
+            item xs={(view === 1 ? 4 : 12)} container direction="row" justifyContent="center" alignItems="center"
+          >
+            <PriorityGraph
+              name={"Distributor 1 Aggregated Data"}
+              runStream={start}
+              eventQueue={"distrubutor.devicedata.sterilizers.inbound"}
+            />
+          </Grid>
+          <Grid
+            style={(view === 1 || view === 2 || view === 5 || view === 6 ? {} : {display: "none"})}
+            xs={4}
           >
             <DeviceDataGraph
-              name={"Company #1 Data"}
+              name={"Company #1 Notifications"}
               runStream={start}
               eventQueue={"company1.devicedata.sterilizers.inbound"}
             />
           </Grid>
           <Grid
-            style={(view === 2 || view === 4 || view === 5 ? {} : {display: "none"})}
+            style={(view === 1 || view === 3 || view === 5 || view === 6 ? {} : {display: "none"})}
+            xs={4}
           >
             <DeviceDataGraph
-              name={"Company #2 Data"}
+              name={"Company #2 Notifications"}
               runStream={start}
               eventQueue={"company2.devicedata.sterilizers.inbound"}
             />
           </Grid>
           <Grid
-            style={(view === 3 || view === 4 || view === 5 ? {} : {display: "none"})}
+            style={(view === 1 || view === 4 || view === 6 ? {} : {display: "none"})}
+            xs={4}
           >
             <DeviceDataGraph
-              name={"Company #3 Data"}
+              name={"Company #3 Notifications"}
               runStream={start}
               eventQueue={"company3.devicedata.sterilizers.inbound"}
             />

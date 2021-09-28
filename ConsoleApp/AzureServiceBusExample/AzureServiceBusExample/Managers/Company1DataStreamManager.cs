@@ -37,8 +37,6 @@ namespace AzureServiceBusExample.Managers
         {
             var events = new List<CloudEvent>();
             var startTime = DateTimeOffset.UtcNow;
-            _logger.LogInformation($"[{startTime}] Sending messages for {COMPANY.ToUpper()}");
-
             for (int i = 1; i <= 500; i++)
             {
                 var randomizedDeviceData = _deviceDataHelper.GetDeviceData();

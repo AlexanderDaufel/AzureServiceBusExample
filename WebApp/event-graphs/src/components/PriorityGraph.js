@@ -27,26 +27,26 @@ class PriorityGraph extends React.Component {
 
             this.setState({ requestMade: true });
 
-            EventStream.GetQueueData(this.props.eventQueue, 1)
+            EventStream.GetQueueData(this.props.eventQueue, 50)
                 .then((response) => response.json())
-                .then((newData) => {
-                    if (newData && newData.length > 0) {
+                .then((data) => {
+                    if (data && data.length > 0) {
                         // Raw events
-                        //debugger;
+                        for(const newData in data) {
+                            var index = this.state.priortyEvents.findIndex(item => item[0] === `${data[newData].data.company} - ${data[newData].data.priority}`);
 
-                        var index = this.state.priortyEvents.findIndex(item => item[0] === `${newData[0].data.company} - ${newData[0].data.priority}`);
-
-                        if (index > -1) {
-                            let newEvents = this.state.priortyEvents;
-                            newEvents[index][1]++;
-                            this.setState({ priortyEvents: newEvents });
-                        } else {
-                            let newEvents = this.state.priortyEvents;
-                            newEvents.push([
-                                `${newData[0].data.company} - ${newData[0].data.priority}`,
-                                1
-                            ]);
-                            this.setState({ priortyEvents: newEvents });
+                            if (index > -1) {
+                                let newEvents = this.state.priortyEvents;
+                                newEvents[index][1]++;
+                                this.setState({ priortyEvents: newEvents });
+                            } else {
+                                let newEvents = this.state.priortyEvents;
+                                newEvents.push([
+                                    `${data[newData].data.company} - ${data[newData].data.priority}`,
+                                    1
+                                ]);
+                                this.setState({ priortyEvents: newEvents });
+                            }
                         }
                     } else {
                         this.setState({ stopRequest: true });

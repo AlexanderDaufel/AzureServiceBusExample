@@ -1,7 +1,7 @@
 export default class EventStream {
 
     static baseUrl = "https://httpqueuereader.azurewebsites.net/api";
-    static code = "WNbpNDi5aelw0g4q1VOhry4EBdqORHvMg0zhzE3BH269NA6xsnPPtA==";
+    static code = "";
 
     static GetQueueData = (eventContainer, pageSize) =>
         new Promise((resolve, reject) => {
